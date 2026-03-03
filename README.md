@@ -145,6 +145,42 @@ claude mcp add granola -- uvx granola-mcp-server
 
 [![Add Granola MCP to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=granola&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJncmFub2xhLW1jcC1zZXJ2ZXIiXSwiZW52Ijp7fX0=)
 
+### Updating
+
+`uvx` caches the package after first run. To update to the latest version:
+
+```bash
+uvx --refresh granola-mcp-server
+```
+
+Then restart your MCP client.
+
+### Manual installation (alternative)
+
+If you prefer to install from source:
+
+```bash
+cd ~
+git clone https://github.com/proofgeist/granola-ai-mcp-server
+cd granola-ai-mcp-server
+uv sync
+```
+
+Then configure your MCP client to run the server directly:
+
+```json
+{
+  "mcpServers": {
+    "granola": {
+      "command": "uv",
+      "args": ["--directory", "/Users/YOUR_USERNAME/granola-ai-mcp-server", "run", "granola-mcp-server"]
+    }
+  }
+}
+```
+
+To update a source install: `git pull && uv sync`
+
 ### pip (alternative)
 
 ```bash
@@ -272,46 +308,15 @@ ls -la ~/Library/Application\ Support/Granola/cache-v*.json
 ```bash
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
-# Or use pip fallback in Claude config
 ```
 
-**"Permission denied" or "Operation not permitted"**
-- **Most common issue on macOS**: This happens when the server is installed in `~/Documents` or other protected folders
-- **Solution 1 (Recommended)**: Move the installation to your home directory:
-  ```bash
-  mv ~/Documents/granola-ai-mcp-server ~/granola-ai-mcp-server
-  cd ~/granola-ai-mcp-server
-  uv sync  # Rebuild venv with correct paths
-  ```
-  Then update the path in `claude_desktop_config.json`
-
-- **Solution 2**: Grant Claude Desktop Full Disk Access:
-  1. Open System Settings → Privacy & Security → Full Disk Access
-  2. Click the lock icon and authenticate
-  3. Click "+" and add `/Applications/Claude.app`
-  4. Toggle Claude to "On"
-  5. Restart Claude Desktop
-
-**"Current directory does not exist"**
-- This error occurs when using `uv run` with the `--directory` flag
-- Use the direct path to the venv script instead (see Installation step 4)
-
 **Server not appearing in Claude Desktop**
-- Verify the absolute path in your Claude config
 - Check Claude Desktop logs: `~/Library/Logs/Claude/mcp-server-granola.log`
-- Look for Python errors in the logs
-- Ensure the path doesn't contain spaces or special characters
 - Restart Claude Desktop after config changes
 
-**"Failed to spawn process" or "No such file or directory"**
-- The Python shebang in the venv script points to the wrong location
-- Run `uv sync` in the project directory to rebuild the venv
-- Verify the script exists: `ls -la ~/granola-ai-mcp-server/.venv/bin/granola-mcp-server`
-
-**Meeting notes appear empty in Claude**
+**Meeting notes appear empty**
 - Granola sometimes stores rich notes inside `documentPanels` rather than `notes_plain`
 - This server reads those panels by default; set `GRANOLA_PARSE_PANELS=0` to disable
-- Run `python test_real_cache.py` to verify panel-backed notes produce content
 
 ## 🤝 Contributing
 
