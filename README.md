@@ -113,123 +113,45 @@ sequenceDiagram
 ## 📦 Installation
 
 ### Prerequisites
-- Python 3.12+
 - [uv](https://docs.astral.sh/uv/) package manager
 - macOS with Granola.ai installed
-- Granola cache file at `~/Library/Application Support/Granola/` (v4 or v3)
 
-### One-Click Install for Cursor (Recommended)
+### Claude Desktop
 
-[![Add Granola MCP to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=granola&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyItLWZyb20iLCJnaXQraHR0cHM6Ly9naXRodWIuY29tL3Byb29mZ2Vpc3QvZ3Jhbm9sYS1haS1tY3Atc2VydmVyIiwiZ3Jhbm9sYS1tY3Atc2VydmVyIl0sImVudiI6e319)
-
-Click the button above to automatically add the Granola MCP server to Cursor.
-
-> **Note:** This requires [uv](https://docs.astral.sh/uv/) to be installed and Granola.ai to be running on macOS.
-
-### Manual Installation (Claude Desktop)
-
-<details>
-<summary>Click to expand manual setup instructions</summary>
-
-1. **Clone the repository to your home directory:**
-   ```bash
-   cd ~
-   git clone https://github.com/proofgeist/granola-ai-mcp-server
-   cd granola-ai-mcp-server
-   ```
-   
-   **Important:** Clone to your home directory (`~`) rather than `~/Documents` to avoid macOS permission issues with Claude Desktop.
-
-2. **Install dependencies with uv:**
-   ```bash
-   uv sync
-   ```
-
-3. **Test the installation:**
-   ```bash
-   uv run python test_server.py
-   ```
-
-4. **Configure Claude Desktop** by adding to your `claude_desktop_config.json`:
-   ```json
-   {
-     "mcpServers": {
-       "granola": {
-         "command": "/Users/YOUR_USERNAME/granola-ai-mcp-server/.venv/bin/granola-mcp-server",
-         "args": [],
-         "env": {}
-       }
-     }
-   }
-   ```
-
-   **Important:**
-   - Replace `YOUR_USERNAME` with your actual macOS username
-   - Use the direct path to the virtual environment's script (not `uv run`) to avoid working directory issues
-   - The path should point to your home directory installation
-
-5. **Restart Claude Desktop** to load the MCP server:
-   ```bash
-   # Quit Claude completely
-   osascript -e 'quit app "Claude"'
-   # Reopen Claude
-   open -a "Claude"
-   ```
-
-</details>
-
-### Alternative: pip installation
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install mcp pydantic
-python test_server.py
-```
-
-## ⚙️ Configuration
-
-### Claude Desktop Integration
-
-Add the following to your Claude Desktop configuration file:
+Add to your `claude_desktop_config.json`:
 
 **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-**Linux:** `~/.config/Claude/claude_desktop_config.json`
-
 ```json
 {
   "mcpServers": {
     "granola": {
-      "command": "uv",
-      "args": ["--directory", "/absolute/path/to/granola-ai-mcp-server", "run", "granola-mcp-server"],
-      "env": {}
+      "command": "uvx",
+      "args": ["granola-mcp-server"]
     }
   }
 }
 ```
 
-> ⚠️ **Important:** Replace `/absolute/path/to/granola-ai-mcp-server` with your actual project path.
+Then restart Claude Desktop.
 
-### Using pip fallback
+### Claude Code
 
-If you don't have `uv` installed:
-
-```json
-{
-  "mcpServers": {
-    "granola": {
-      "command": "python3",
-      "args": ["/absolute/path/to/granola-ai-mcp-server/run_server.py"],
-      "env": {
-        "PYTHONPATH": "/absolute/path/to/granola-ai-mcp-server/.venv/lib/python3.13/site-packages"
-      }
-    }
-  }
-}
+```bash
+claude mcp add granola -- uvx granola-mcp-server
 ```
+
+### Cursor
+
+[![Add Granola MCP to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=granola&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJncmFub2xhLW1jcC1zZXJ2ZXIiXSwiZW52Ijp7fX0=)
+
+### pip (alternative)
+
+```bash
+pip install granola-mcp-server
+```
+
+Then configure your MCP client to run `granola-mcp-server`.
 
 ### Environment Variables
 

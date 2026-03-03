@@ -61,4 +61,4 @@ Auto-detects system timezone via `time.tzname` with US timezone mappings. Falls 
 
 ## Release Process
 
-Uses **python-semantic-release** via GitHub Actions on push to `main`. Conventional commit messages drive version bumps. Config lives in `pyproject.toml` under `[tool.semantic_release]`.
+Uses **python-semantic-release** via GitHub Actions on push to `main`. Conventional commit messages drive version bumps. Releases are published to [PyPI](https://pypi.org/project/granola-mcp-server/) via trusted publishing. Config lives in `pyproject.toml` under `[tool.semantic_release]`.
