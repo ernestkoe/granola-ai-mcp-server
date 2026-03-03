@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.2.1 (2026-03-03)
+
+### Bug Fixes
+
+- Update repo references from granola-ai-mcp-server to granola-mcp-server
+  ([`6eb5850`](https://github.com/proofgeist/granola-mcp-server/commit/6eb5850fb8ee3a69f29874764713b9e97c05cc25))
+
+
 ## v1.2.0 (2026-03-03)
 
 ### Bug Fixes
