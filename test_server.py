@@ -119,5 +119,41 @@ async def test_server():
         Path(cache_path).unlink()
 
 
+async def test_v4_cache_format():
+    """Test that the v4 cache format (dict instead of JSON string) parses correctly."""
+    print("\nTesting v4 cache format (dict-based)...")
+    state = {
+        "documents": {
+            "m1": {
+                "title": "V4 Meeting",
+                "created_at": "2024-02-01T14:00:00",
+                "notes_plain": "Notes from v4 format",
+            }
+        },
+        "transcripts": {},
+    }
+
+    # v4 format: cache value is a dict, not a JSON string
+    cache_wrapper = {"cache": {"state": state}}
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as handle:
+        json.dump(cache_wrapper, handle)
+        cache_path = handle.name
+
+    try:
+        server = GranolaMCPServer(cache_path=cache_path)
+        await server._load_cache()
+
+        assert server.cache_data, "Cache data should not be empty"
+        assert "m1" in server.cache_data.documents, "Document m1 should be parsed from v4 format"
+        assert server.cache_data.documents["m1"].content == "Notes from v4 format"
+
+        print("V4 cache format test passed!")
+
+    finally:
+        Path(cache_path).unlink()
+
+
 if __name__ == "__main__":
     asyncio.run(test_server())
+    asyncio.run(test_v4_cache_format())

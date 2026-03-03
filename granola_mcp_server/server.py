@@ -26,7 +26,9 @@ class GranolaMCPServer:
     def __init__(self, cache_path: Optional[str] = None, timezone: Optional[str] = None):
         """Initialize the Granola MCP server."""
         if cache_path is None:
-            cache_path = os.path.expanduser("~/Library/Application Support/Granola/cache-v3.json")
+            v4 = os.path.expanduser("~/Library/Application Support/Granola/cache-v4.json")
+            v3 = os.path.expanduser("~/Library/Application Support/Granola/cache-v3.json")
+            cache_path = v4 if os.path.exists(v4) else v3
         
         self.cache_path = cache_path
         self.server = Server("granola-mcp-server")
@@ -232,9 +234,15 @@ class GranolaMCPServer:
                 raw_data = json.load(f)
             
             # Handle Granola's nested cache structure
-            if 'cache' in raw_data and isinstance(raw_data['cache'], str):
-                # Cache data is stored as a JSON string inside the 'cache' key
-                actual_data = json.loads(raw_data['cache'])
+            # v3: cache value is a JSON string; v4: cache value is a dict
+            if 'cache' in raw_data:
+                cache_val = raw_data['cache']
+                if isinstance(cache_val, str):
+                    actual_data = json.loads(cache_val)
+                elif isinstance(cache_val, dict):
+                    actual_data = cache_val
+                else:
+                    actual_data = raw_data
                 if 'state' in actual_data:
                     raw_data = actual_data['state']
                 else:
