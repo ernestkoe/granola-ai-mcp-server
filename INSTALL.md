@@ -70,9 +70,10 @@ In Claude Desktop, try asking:
 ## Troubleshooting
 
 ### Cache File Not Found
-If you get errors about the cache file, ensure Granola.ai is installed and has created meetings. The default cache location is:
+If you get errors about the cache file, ensure Granola.ai is installed and has created meetings. The server auto-detects the cache at:
 ```
-~/Library/Application Support/Granola/cache-v3.json
+~/Library/Application Support/Granola/cache-v4.json  (current)
+~/Library/Application Support/Granola/cache-v3.json  (legacy)
 ```
 
 ### Python Path Issues  
@@ -84,5 +85,5 @@ pip3 install --user mcp pydantic
 ### Permission Errors
 Ensure the cache file is readable:
 ```bash
-ls -la "~/Library/Application Support/Granola/cache-v3.json"
+ls -la ~/Library/Application\ Support/Granola/cache-v*.json
 ```

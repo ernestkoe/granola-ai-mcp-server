@@ -54,7 +54,7 @@ flowchart TB
     end
     
     subgraph Data["💾 Data Layer"]
-        CACHE_FILE[(Granola Cache<br/>cache-v3.json)]
+        CACHE_FILE[(Granola Cache<br/>cache-v4.json)]
         MODELS[Pydantic Models<br/>MeetingMetadata<br/>MeetingDocument<br/>MeetingTranscript]
     end
     
@@ -85,7 +85,7 @@ sequenceDiagram
 
     User->>Claude: "Search for meetings about quarterly planning"
     Claude->>Server: MCP: search_meetings(query)
-    Server->>Cache: Read cache-v3.json
+    Server->>Cache: Read cache file
     Cache-->>Server: Raw JSON data
     Server->>Server: Parse & validate with Pydantic
     Server->>Server: Search across titles, participants, transcripts
@@ -108,7 +108,7 @@ sequenceDiagram
 | **Data Validation** | Pydantic 2.x |
 | **Package Manager** | uv (recommended) or pip |
 | **Build System** | Hatchling |
-| **Release Automation** | semantic-release (Node.js) |
+| **Release Automation** | python-semantic-release |
 
 ## 📦 Installation
 
@@ -116,7 +116,7 @@ sequenceDiagram
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) package manager
 - macOS with Granola.ai installed
-- Granola cache file at `~/Library/Application Support/Granola/cache-v3.json`
+- Granola cache file at `~/Library/Application Support/Granola/` (v4 or v3)
 
 ### One-Click Install for Cursor (Recommended)
 
@@ -311,8 +311,7 @@ granola-ai-mcp-server/
 ├── tests/
 │   ├── test_server.py       # Unit tests with synthetic cache
 │   └── test_real_cache.py   # Integration tests with real data
-├── pyproject.toml           # Python package configuration
-├── package.json             # Node.js deps for semantic-release
+├── pyproject.toml           # Python package configuration + semantic-release config
 ├── run_server.py            # Entry point wrapper
 ├── INSTALL.md               # Detailed installation guide
 ├── LICENSE                  # MIT License
@@ -344,7 +343,7 @@ granola-ai-mcp-server/
 **"Cache file not found"**
 ```bash
 # Ensure Granola.ai is installed and has processed some meetings
-ls -la "~/Library/Application Support/Granola/cache-v3.json"
+ls -la ~/Library/Application\ Support/Granola/cache-v*.json
 ```
 
 **"uv command not found"**
