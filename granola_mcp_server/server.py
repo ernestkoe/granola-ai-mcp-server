@@ -26,9 +26,19 @@ class GranolaMCPServer:
     def __init__(self, cache_path: Optional[str] = None, timezone: Optional[str] = None):
         """Initialize the Granola MCP server."""
         if cache_path is None:
-            v4 = os.path.expanduser("~/Library/Application Support/Granola/cache-v4.json")
-            v3 = os.path.expanduser("~/Library/Application Support/Granola/cache-v3.json")
-            cache_path = v4 if os.path.exists(v4) else v3
+            granola_dir = os.path.expanduser("~/Library/Application Support/Granola")
+            # Find all cache-v*.json files, pick highest version
+            import glob
+            cache_files = glob.glob(os.path.join(granola_dir, "cache-v*.json"))
+            if cache_files:
+                def version_key(p):
+                    try:
+                        return int(os.path.basename(p).replace("cache-v", "").replace(".json", ""))
+                    except ValueError:
+                        return 0
+                cache_path = max(cache_files, key=version_key)
+            else:
+                cache_path = os.path.join(granola_dir, "cache-v4.json")
         
         self.cache_path = cache_path
         self.server = Server("granola-mcp-server")

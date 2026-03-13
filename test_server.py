@@ -154,6 +154,37 @@ async def test_v4_cache_format():
         Path(cache_path).unlink()
 
 
+def test_version_detection():
+    """Test that cache discovery picks the highest version file."""
+    import glob as glob_mod
+    import tempfile
+    import os
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create fake cache files for v3, v4, v6
+        for v in [3, 4, 6]:
+            Path(os.path.join(tmpdir, f"cache-v{v}.json")).write_text("{}")
+
+        cache_files = glob_mod.glob(os.path.join(tmpdir, "cache-v*.json"))
+
+        def version_key(p):
+            try:
+                return int(os.path.basename(p).replace("cache-v", "").replace(".json", ""))
+            except ValueError:
+                return 0
+
+        best = max(cache_files, key=version_key)
+        assert best.endswith("cache-v6.json"), f"Expected v6, got {best}"
+
+        # Also verify ordering: v6 > v4 > v3
+        sorted_files = sorted(cache_files, key=version_key, reverse=True)
+        versions = [version_key(f) for f in sorted_files]
+        assert versions == [6, 4, 3], f"Expected [6, 4, 3], got {versions}"
+
+    print("Version detection test passed!")
+
+
 if __name__ == "__main__":
     asyncio.run(test_server())
     asyncio.run(test_v4_cache_format())
+    test_version_detection()

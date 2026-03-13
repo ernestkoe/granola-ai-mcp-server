@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MCP server that exposes Granola.ai meeting data (notes, transcripts, participants) to AI assistants. It reads directly from Granola's local cache file (`~/Library/Application Support/Granola/cache-v4.json`, falling back to `cache-v3.json`) — no API keys needed, macOS only.
+MCP server that exposes Granola.ai meeting data (notes, transcripts, participants) to AI assistants. It reads directly from Granola's local cache file (`~/Library/Application Support/Granola/cache-v*.json`) — no API keys needed, macOS only. The server auto-detects the highest available cache version (v6, v4, v3, etc.) via glob.
 
 ## Commands
 
@@ -42,7 +42,7 @@ uv sync
 
 ### Cache Parsing Pipeline
 
-Granola's cache has two format versions. In v3 (`cache-v3.json`), the `cache` key contains a JSON **string** (double-encoded). In v4 (`cache-v4.json`), the `cache` key is a **dict** directly. The server auto-detects which file exists (preferring v4) and handles both formats. The parsing flow:
+Granola's cache format has evolved across versions. In v3 (`cache-v3.json`), the `cache` key contains a JSON **string** (double-encoded). In v4+ (`cache-v4.json`, `cache-v6.json`, etc.), the `cache` key is a **dict** directly. The server auto-detects the highest available cache version via glob and handles both formats. The parsing flow:
 
 1. `_load_cache()` → reads file, double-parses JSON
 2. `_parse_cache_data()` → transforms raw Granola format into Pydantic models
