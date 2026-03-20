@@ -43,6 +43,7 @@ class GranolaMCPServer:
         self.cache_path = cache_path
         self.server = Server("granola-mcp-server")
         self.cache_data: Optional[CacheData] = None
+        self._cache_mtime: Optional[float] = None
         
         # Set up timezone handling
         if timezone:
@@ -228,9 +229,15 @@ class GranolaMCPServer:
                 raise ValueError(f"Unknown tool: {name}")
     
     async def _ensure_cache_loaded(self):
-        """Ensure cache data is loaded."""
-        if self.cache_data is None:
+        """Ensure cache data is loaded, reloading if the file has been modified."""
+        try:
+            current_mtime = os.path.getmtime(self.cache_path)
+        except OSError:
+            current_mtime = None
+
+        if self.cache_data is None or current_mtime != self._cache_mtime:
             await self._load_cache()
+            self._cache_mtime = current_mtime
     
     async def _load_cache(self):
         """Load and parse Granola cache data."""
