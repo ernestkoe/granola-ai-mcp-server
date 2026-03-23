@@ -1,7 +1,10 @@
 """Granola MCP Server implementation."""
 
+import gzip
 import json
 import os
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -564,14 +567,85 @@ class GranolaMCPServer:
         
         return [TextContent(type="text", text="\n".join(details))]
     
+    def _fetch_transcript_from_api(self, meeting_id: str) -> Optional[str]:
+        """Fetch transcript from Granola API as fallback for server-side transcriptions.
+
+        Granola can transcribe meetings server-side even when local transcription is
+        disabled (indicated by ``"transcribe": false`` in the cache). In that case the
+        local cache contains no transcript text, but the API has the full transcript.
+        """
+        try:
+            granola_dir = os.path.expanduser("~/Library/Application Support/Granola")
+            supabase_path = Path(granola_dir) / "supabase.json"
+            if not supabase_path.exists():
+                return None
+
+            with open(supabase_path, "r", encoding="utf-8") as f:
+                supabase_data = json.load(f)
+
+            # workos_tokens is stored as a JSON-encoded string
+            workos_raw = supabase_data.get("workos_tokens", "{}")
+            if isinstance(workos_raw, str):
+                workos_tokens = json.loads(workos_raw)
+            else:
+                workos_tokens = workos_raw
+
+            access_token = workos_tokens.get("access_token")
+            if not access_token:
+                return None
+
+            payload = json.dumps({"document_id": meeting_id}).encode("utf-8")
+            req = urllib.request.Request(
+                "https://api.granola.ai/v1/get-document-transcript",
+                data=payload,
+                method="POST",
+            )
+            req.add_header("Authorization", f"Bearer {access_token}")
+            req.add_header("Content-Type", "application/json")
+
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                raw = resp.read()
+
+            # Response may be gzip-compressed
+            try:
+                body = gzip.decompress(raw).decode("utf-8")
+            except Exception:
+                body = raw.decode("utf-8")
+
+            segments = json.loads(body)
+            if not isinstance(segments, list) or not segments:
+                return None
+
+            return " ".join(
+                seg["text"].strip()
+                for seg in segments
+                if isinstance(seg, dict) and seg.get("text", "").strip()
+            )
+
+        except Exception as e:
+            print(f"Granola API transcript fetch failed for {meeting_id}: {e}")
+            return None
+
     async def _get_meeting_transcript(self, meeting_id: str) -> List[TextContent]:
         """Get meeting transcript."""
         if not self.cache_data:
             return [TextContent(type="text", text="No meeting data available")]
-        
+
+        # When local transcription is disabled ("transcribe": false in cache), Granola
+        # may still have the transcript server-side. Fall back to the API in that case.
         if meeting_id not in self.cache_data.transcripts:
-            return [TextContent(type="text", text=f"No transcript available for meeting '{meeting_id}'")]
-        
+            api_content = self._fetch_transcript_from_api(meeting_id)
+            if api_content:
+                self.cache_data.transcripts[meeting_id] = MeetingTranscript(
+                    meeting_id=meeting_id,
+                    content=api_content,
+                    speakers=[],
+                    language=None,
+                    confidence=None,
+                )
+            else:
+                return [TextContent(type="text", text=f"No transcript available for meeting '{meeting_id}'")]
+
         transcript = self.cache_data.transcripts[meeting_id]
         meeting = self.cache_data.meetings.get(meeting_id)
         
