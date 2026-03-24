@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-03-24)
+
+### Bug Fixes
+
+- Reload cache when file changes instead of loading once
+  ([#16](https://github.com/proofgeist/granola-mcp-server/pull/16),
+  [`e61e07c`](https://github.com/proofgeist/granola-mcp-server/commit/e61e07cca47cc2a88ee43b1a15e938fa9d108be6))
+
+### Chores
+
+- **deps**: Bump pyjwt from 2.10.1 to 2.12.0
+  ([#18](https://github.com/proofgeist/granola-mcp-server/pull/18),
+  [`7617bc3`](https://github.com/proofgeist/granola-mcp-server/commit/7617bc3c9c7ae05173579fb2ec3f0ea9ee694321))
+
+### Features
+
+- Fall back to Granola API when local transcript is missing
+  ([#17](https://github.com/proofgeist/granola-mcp-server/pull/17),
+  [`2280d4e`](https://github.com/proofgeist/granola-mcp-server/commit/2280d4ea2a712405183debb1dd0575d3a1e72cf8))
+
+
 ## v1.3.0 (2026-03-13)
 
 ### Documentation
